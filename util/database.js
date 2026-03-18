@@ -10,13 +10,12 @@
 
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 let _db;
 
 const mongoConnect = (callback) => {
-  MongoClient.connect(
-    "mongodb+srv://vojin-rw:1234@cluster0.hv4qvgb.mongodb.net/shop?appName=Cluster0",
-  )
+  MongoClient.connect(MONGODB_URI)
     .then((client) => {
       console.log("Connected!");
       _db = client.db();
