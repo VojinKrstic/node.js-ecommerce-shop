@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -8,12 +9,15 @@ const MongoDBStore = require("connect-mongo").default;
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const { default: helmet } = require("helmet");
 
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const shopRoutes = require("./routes/shop");
 const User = require("./models/user");
 const errorController = require("./controllers/error");
+const compression = require("compression");
+const morgan = require("morgan");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -50,6 +54,15 @@ const fileFilter = (req, file, cb) => {
 
 app.set("view engine", "ejs");
 app.set("views", "views");
+
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  { flags: "a" },
+);
+
+app.use(helmet());
+app.use(compression());
+app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -119,7 +132,7 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((err) => {
     console.log(err);
